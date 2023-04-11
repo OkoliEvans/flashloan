@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier:MIT
 
 pragma solidity ^0.8.13;
  
@@ -7,7 +7,7 @@ import "../src/attack.sol";
  
 contract AttackerTest is Test {
    function setUp() public {
-       vm.createSelectFork("mainnet", 14595905);
+       vm.createSelectFork("https://rpc.ankr.com/eth", 14595905);
        vm.deal(address(this), 70 ether);
    }
  
